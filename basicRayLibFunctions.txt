@@ -1,0 +1,145 @@
+================================================================================
+ESSENTIELLA 2D-FUNKTIONER I RAYLIB - SNABBGUIDE
+================================================================================
+
+1. GRAFIK OCH "PRO"-RITFUNKTIONER
+--------------------------------------------------------------------------------
+
+* DrawTexturePro()
+  Beskrivning: Ritar en utklippt del av en textur (t.ex. från ett spritesheet)
+               med stöd för skalning, rotation och valfri pivot-punkt (origin).
+  Exempel:
+    Rectangle src = { 0, 0, 32, 32 };       // Ruta på spritesheet
+    Rectangle dst = { 400, 225, 64, 64 };   // Position och ny storlek på skärm
+    Vector2 origin = { 32, 32 };            // Rotera runt mitten (halva dst)
+    DrawTexturePro(tex, src, dst, origin, 45.0f, WHITE);
+
+* DrawRectanglePro()
+  Beskrivning: Ritar en fylld rektangel med stöd för rotation runt en egen
+               pivot-punkt. Bra för roterande hitboxes eller laserstrålar.
+  Exempel:
+    Rectangle rec = { 200, 200, 100, 20 };
+    Vector2 origin = { 50, 10 };            // Mitten av rektangeln
+    DrawRectanglePro(rec, origin, 30.0f, RED);
+
+* DrawTextureNPatch()
+  Beskrivning: Ritar 9-slice-grafik där hörn och kanter behåller sin skärpa
+               oavsett hur mycket rutan dras ut. Perfekt för UI och dialoger.
+  Exempel:
+    NPatchInfo npatch = { (Rectangle){0, 0, 24, 24}, 8, 8, 8, 8, NPATCH_NINE_PATCH };
+    Rectangle dst = { 50, 50, 300, 120 };
+    DrawTextureNPatch(uiTex, npatch, dst, (Vector2){0, 0}, 0.0f, WHITE);
+
+
+2. KAMERA OCH KOORDINATSYSTEM
+--------------------------------------------------------------------------------
+
+* Camera2D + BeginMode2D() / EndMode2D()
+  Beskrivning: Skapar en 2D-kamera med stöd för förflyttning, zoom och rotation.
+               Allt som ritas mellan BeginMode2D och EndMode2D följer kameran.
+  Exempel:
+    Camera2D cam = { 0 };
+    cam.target = playerPos;                 // Vad kameran fokuserar på
+    cam.offset = (Vector2){ 400, 225 };     // Centrera på skärmen (800x450)
+    cam.zoom = 1.5f;
+
+    BeginMode2D(cam);
+        DrawTexture(playerTex, playerPos.x, playerPos.y, WHITE);
+    EndMode2D();
+
+* GetScreenToWorld2D() & GetWorldToScreen2D()
+  Beskrivning: Omvandlar koordinater mellan skärmen (t.ex. muspekaren) och
+               spelvärlden när en Camera2D används.
+  Exempel:
+    Vector2 mouseScreen = GetMousePosition();
+    Vector2 mouseWorld = GetScreenToWorld2D(mouseScreen, cam);
+    Vector2 screenPos = GetWorldToScreen2D(enemyPos, cam);
+
+
+3. UPPLÖSNING OCH SKÄRMEFFEKTER
+--------------------------------------------------------------------------------
+
+* RenderTexture2D + BeginTextureMode() / EndTextureMode()
+  Beskrivning: Ritar grafik till en osynlig textur i minnet istället för direkt
+               på skärmen. Används för pixel-art-skalning, minimaps och shaders.
+  Exempel:
+    // Initiering (utanför loopen):
+    RenderTexture2D target = LoadRenderTexture(320, 180);
+
+    // I ritloopen:
+    BeginTextureMode(target);
+        ClearBackground(BLACK);
+        DrawCircle(160, 90, 10, RED);
+    EndTextureMode();
+
+    // Rita ut texturen uppskalad (obs: negativ höjd pga OpenGL-koordinater):
+    BeginDrawing();
+        DrawTexturePro(target.texture, (Rectangle){0, 0, 320, -180},
+                       (Rectangle){0, 0, 1280, 720}, (Vector2){0, 0}, 0, WHITE);
+    EndDrawing();
+
+
+4. TID, FYSIK OCH MATEMATIK (kräver #include "raymath.h")
+--------------------------------------------------------------------------------
+
+* GetFrameTime()
+  Beskrivning: Returnerar tiden i sekunder som passerat sedan förra bildrutan
+               (delta time). Gör spelhastigheten oberoende av FPS.
+  Exempel:
+    float dt = GetFrameTime();
+    playerPos.x += 200.0f * dt;             // Rör sig 200 pixlar per sekund
+
+* Vector2Normalize()
+  Beskrivning: Gör en riktningvektor exakt 1 enhet lång så att diagonal rörelse
+               inte går snabbare än horisontell/vertikal rörelse.
+  Exempel:
+    Vector2 dir = { 1.0f, 1.0f };
+    dir = Vector2Normalize(dir);            // Blir ca { 0.707f, 0.707f }
+
+* Vector2Distance()
+  Beskrivning: Räknar ut det exakta avståndet i pixlar mellan två punkter.
+  Exempel:
+    float dist = Vector2Distance(playerPos, enemyPos);
+    if (dist < 50.0f) { /* Fienden är nära */ }
+
+* Lerp()
+  Beskrivning: Linjär interpolation mellan två värden. Perfekt för mjuk
+               kameraföljning eller mjuka övergångar.
+  Exempel:
+    cam.target.x = Lerp(cam.target.x, playerPos.x, 5.0f * GetFrameTime());
+
+* Clamp()
+  Beskrivning: Begränsar ett värde så att det aldrig understiger ett minimum
+               eller överstiger ett maximum (t.ex. skärmkanter eller HP).
+  Exempel:
+    playerPos.x = Clamp(playerPos.x, 0.0f, 800.0f);
+
+
+5. KOLLISIONER
+--------------------------------------------------------------------------------
+
+* CheckCollisionRecs() & GetCollisionRec()
+  Beskrivning: Kontrollerar om två rektanglar överlappar (AABB) och returnerar
+               själva överlappsytan som en ny rektangel.
+  Exempel:
+    if (CheckCollisionRecs(playerBox, wallBox)) {
+        Rectangle overlap = GetCollisionRec(playerBox, wallBox);
+        // Använd overlap.width eller overlap.height för att knuffa ut spelaren
+    }
+
+* CheckCollisionCircleRec() & CheckCollisionCircles()
+  Beskrivning: Kontrollerar kollision mellan en cirkel och en rektangel, eller
+               mellan två cirklar. Bra för bollar och runda hitboxes.
+  Exempel:
+    bool hitWall = CheckCollisionCircleRec(ballPos, 10.0f, wallBox);
+    bool hitEnemy = CheckCollisionCircles(bulletPos, 4.0f, enemyPos, 16.0f);
+
+* CheckCollisionPointRec()
+  Beskrivning: Kontrollerar om en specifik punkt (t.ex. muspekaren) befinner sig
+               inuti en rektangel. Standard för knappar i menyer.
+  Exempel:
+    if (CheckCollisionPointRec(GetMousePosition(), buttonRec)) {
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) { /* Klickad! */ }
+    }
+
+================================================================================

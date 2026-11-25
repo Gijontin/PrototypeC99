@@ -1,0 +1,47 @@
+{
+    // 1. Förhindra att VS Code råkar byta ut Tabs mot mellanslag i din Makefile
+    "[makefile]": {
+        "editor.insertSpaces": false,
+        "editor.tabSize": 4
+    },
+
+    // 2. Spara automatiskt alla öppna .c/.h-filer innan du trycker F5 eller Ctrl+Shift+B
+    "files.saveConflictResolution": "overwriteFileOnDisk",
+    "task.saveBeforeRun": "always",
+
+    // 3. Dölj kompilerade skräpfiler (.o och .exe) från VS Codes sidopanel så det blir lättare att hitta din kod
+    "files.exclude": {
+        "**/*.o": true,
+        "**/*.exe": true
+    },
+    "workbench.colorCustomizations": {
+        "activityBar.activeBackground": "#bc9067",
+        "activityBar.activeBorder": "#15202b",
+        "activityBar.background": "#bc9067",
+        "activityBar.foreground": "#15202b",
+        "activityBar.inactiveForeground": "#15202b99",
+        "activityBarBadge.background": "#bde2cf",
+        "activityBarBadge.foreground": "#15202b",
+        "activityBarTop.activeBackground": "#bc9067",
+        "activityBarTop.activeBorder": "#15202b",
+        "activityBarTop.background": "#bc9067",
+        "activityBarTop.foreground": "#15202b",
+        "activityBarTop.inactiveForeground": "#15202b99",
+        "commandCenter.border": "#e7e7e799",
+        "commandCenter.foreground": "#e7e7e7",
+        "sash.hoverBorder": "#bc9067",
+        "statusBar.background": "#a77649",
+        "statusBar.debuggingBackground": "#a77649",
+        "statusBar.debuggingForeground": "#e7e7e7",
+        "statusBar.foreground": "#e7e7e7",
+        "statusBar.inactiveBackground": "#a77649",
+        "statusBarItem.hoverBackground": "#bc9067",
+        "statusBarItem.remoteBackground": "#27593f",
+        "statusBarItem.remoteForeground": "#e7e7e7",
+        "titleBar.activeBackground": "#a77649",
+        "titleBar.activeForeground": "#e7e7e7",
+        "titleBar.inactiveBackground": "#a7764999",
+        "titleBar.inactiveForeground": "#e7e7e799"
+    },
+    "peacock.color": "#a77649"
+}

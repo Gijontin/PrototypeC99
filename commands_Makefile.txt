@@ -1,0 +1,54 @@
+====================================================================
+C + MAKEFILE + RAYLIB CHEAT SHEET (FOR .NET DEVELOPERS)
+====================================================================
+
+1. BUILDING & RUNNING (YOUR DAILY LOOP)
+--------------------------------------------------------------------
+dotnet build              -->  make
+  Compiles only changed .c files into .o files and links dialogue.exe.
+
+dotnet clean              -->  make clean
+  Deletes all generated .o files and dialogue.exe.
+
+dotnet clean && dotnet build  -->  make clean && make
+  Forces a completely fresh rebuild from scratch.
+
+dotnet run                -->  ./dialogue.exe   (or .\dialogue.exe in PowerShell)
+  Runs your compiled program. (Notice C doesn't auto-build when you run!)
+
+Build + Run in one line   -->  make && ./dialogue.exe
+  The true equivalent of "dotnet run": builds if needed, then runs if build succeeded.
+
+
+2. VS CODE SHORTCUTS (IF YOU ADDED TASKS.JSON / LAUNCH.JSON)
+--------------------------------------------------------------------
+Ctrl + Shift + B          -->  Runs "make" (Builds the project)
+F5                        -->  Runs "make", launches GDB debugger, hits breakpoints
+Ctrl + F5                 -->  Runs without debugging
+
+
+3. WHAT IS ACTUALLY HAPPENING UNDER THE HOOD?
+--------------------------------------------------------------------
+C has NO project system (.csproj) or runtime like .NET. Everything happens in 2 steps:
+
+Step 1: Compile (.c -> .o)
+  gcc -std=c99 -Wall -Wextra -g -IC:/raylib/w64devkit/include -c main.c -o main.o
+  Turns each .c file into an "object file" (.o) of raw machine code.
+
+Step 2: Link (.o + Raylib -> .exe)
+  gcc main.o -o dialogue.exe -LC:/raylib/w64devkit/lib -lraylib -lopengl32 -lgdi32 -lwinmm
+  Glues your .o files together with Raylib and Windows graphics libraries into one .exe.
+
+* Your Makefile just automates Step 1 and Step 2 so you only have to type "make".
+
+
+4. BONUS: ADDING "make run" TO YOUR MAKEFILE
+--------------------------------------------------------------------
+If you want a literal "dotnet run" equivalent, add this to the bottom of your Makefile:
+
+.PHONY: run
+run: $(TARGET)
+	./$(TARGET)
+
+Then you can just type:
+  make run
