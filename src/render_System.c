@@ -2,7 +2,10 @@
 
 void renderSystem_Draw(const World *world) {
     
-    for (int i = 0; i < world->entityCount; i++) {
+    uint32_t required = COMP_TRANSFORM | COMP_RENDER;
+
+    for (uint32_t i = 0; i < world->entityCount; i++) {
+        if ((world->masks[i] & required) != required) {continue;}
         if (!world->renders[i].isVisible) {continue;}
 
         switch (world->renders[i].type)

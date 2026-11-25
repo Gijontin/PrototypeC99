@@ -5,7 +5,7 @@
 void world_Init(World *world) {
 
     //fresh start (complete wipe, hopefully)
-    memset(world, 0, sizeof(world));
+    memset(world, 0, sizeof(*world));
 }
 
 Entity world_CreateEntity(World *world) {

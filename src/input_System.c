@@ -35,10 +35,26 @@ bool isSprinting(){
     return IsKeyDown(KEY_LEFT_SHIFT);
 }
 
-void inputSystem_Update(World *world, Entity player) {
-    world->movements[player].direction = input_GetDirection();
-    world->movements[player].speedMultiplier = isSprinting() ? 1.5 : 1;
 
-    //mc->direction = input_GetDirection();
-    //mc->speedMultiplier = isSprinting() ? 1.5 : 1;
+/*
+AI explaining how the binary bitshift-mask-shid comparison logic works with the if check and need for a variable like 'required':
+
+0101  (entity's mask: Transform + Render)
+& 0011  (required mask: Transform + Movement)
+------
+  0001  (Result: 0001 != 0011 -> Evaluates to FALSE, entity is skipped)
+
+*/
+void inputSystem_Update(World *world) {
+
+    uint32_t required = COMP_MOVEMENT | COMP_PLAYER_INPUT;
+
+    for (uint32_t i = 0; i < world->entityCount; i++) {
+    
+        if ((world->masks[i] & required) != required) {continue;}
+        
+        world->movements[i].direction = input_GetDirection();
+        world->movements[i].speedMultiplier = isSprinting() ? 1.5f : 1.0f;
+    }
+
 }

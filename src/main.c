@@ -7,6 +7,8 @@ int main(void){
     SetTargetFPS(60);
 
     World world = {0};
+    world_Init(&world);
+
     Entity player = world_CreateEntity(&world); //sets player (ID) to 0 and bump up the world.entityCount to 1 (which will assign ID '1' to next Entity)
         world.transforms[player] = (transform_Component) {
             .position = {SCREENWIDTH * 0.5, SCREENHEIGHT * 0.5},
@@ -25,13 +27,29 @@ int main(void){
             .texture = NULL,
             .zIndex = 0,
             };
-
-
+        world.masks[player] = 
+            COMP_TRANSFORM | COMP_MOVEMENT | COMP_RENDER | COMP_PLAYER_INPUT;
+    Entity wall = world_CreateEntity(&world);
+        world.transforms[wall] = (transform_Component) {
+            .position = {500.0f, 200.0f},
+            .size = {40.0f, 40.0f},
+            .rotation = 0.0f
+        };
+        world.renders[wall] = (render_Component) {
+            .color = RED,
+            .isVisible = true,
+            .type = RND_REC,
+            .texture = NULL,
+            .zIndex = 0,
+            };
+        world.masks[wall] = 
+            COMP_TRANSFORM | COMP_RENDER;
+            
     while (!WindowShouldClose()){
 
         float deltaTime = GetFrameTime() * 60.0f; //normalize speed regardless of fps
 
-        inputSystem_Update(&world, player);
+        inputSystem_Update(&world);
         movementSystem_Update(&world, deltaTime);
 
         BeginDrawing();
