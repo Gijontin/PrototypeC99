@@ -11,8 +11,16 @@ void movementSystem_Update(World *world, float dt) {
         world->movements[i].velocity.x = world->movements[i].direction.x * (world->movements[i].speed * world->movements[i].speedMultiplier);
         world->movements[i].velocity.y = world->movements[i].direction.y * (world->movements[i].speed * world->movements[i].speedMultiplier);
 
+    //Update Position
         world->transforms[i].position.x += world->movements[i].velocity.x * dt;
         world->transforms[i].position.y += world->movements[i].velocity.y * dt;
+    
+    //Update Hurtbox/Hitbox Position
+        if (world->masks[i] & COMP_COLLIDER) {
+            world->colliders[i].collisionBox.x = world->transforms[i].position.x;
+            world->colliders[i].collisionBox.y =  world->transforms[i].position.y;
+        }
+
     }
 }
 /* void movementSystem_Update(transform_Component *tc, movement_Component *mc, float dt) {

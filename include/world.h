@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "transform_Component.h"
+#include "collider_Component.h"
 #include "movement_Component.h"
 #include "render_Component.h"
 
@@ -15,7 +16,7 @@ typedef uint32_t Entity;
 -- bit-shift:ade enum värden som agerar som flaggor för vilka components en entity har och inte har --
 
 (man ser hur man bit-shiftar 1:an till vänster med '<<' och ett nummer )
-Hur många decimaler varje enum har och Binary-koden i samma ordning, tack vare bit-shifting då:
+Hur många decimaler varje enum har och Binary-koden i samma ordningsföljd som enum deklarationen, tack vare bit-shifting då:
 0, 0000
 1, 0001
 2, 0010
@@ -27,15 +28,24 @@ typedef enum {
     COMP_TRANSFORM = 1 << 0,
     COMP_MOVEMENT = 1 << 1,
     COMP_RENDER = 1 << 2,
-    COMP_PLAYER_INPUT = 1 << 3
+    COMP_PLAYER_INPUT = 1 << 3,
+    COMP_COLLIDER = 1 << 4
 } componentMask;
 
 typedef struct {
+    Entity A;
+    Entity B;
+} collisionPair;
+
+typedef struct {
     transform_Component transforms[MAX_ENTITIES];
+    collider_Component colliders[MAX_ENTITIES];
     movement_Component movements[MAX_ENTITIES];
     render_Component renders[MAX_ENTITIES];
+    collisionPair collisionpairs[MAX_ENTITIES * 2]; // "* 2" you know why...
     uint32_t masks[MAX_ENTITIES];
     uint32_t entityCount;
+    uint32_t collisionPairBuffer;
 } World;
 
 /*

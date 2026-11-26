@@ -20,6 +20,16 @@ int main(void){
             .speedMultiplier = 1.5f,
             .canMove = true,
             };
+        world.colliders[player] = (collider_Component) {
+            .collisionBox = (Rectangle){
+                    world.transforms[player].position.x,
+                    world.transforms[player].position.y,
+                    world.transforms[player].size.x,
+                    world.transforms[player].size.y,
+                },
+            .isImmovable = false,
+            .isTrigger = false,
+            };
         world.renders[player] = (render_Component) {
             .color = BLUE,
             .isVisible = true,
@@ -28,13 +38,23 @@ int main(void){
             .zIndex = 0,
             };
         world.masks[player] = 
-            COMP_TRANSFORM | COMP_MOVEMENT | COMP_RENDER | COMP_PLAYER_INPUT;
+            COMP_TRANSFORM | COMP_MOVEMENT | COMP_COLLIDER | COMP_RENDER | COMP_PLAYER_INPUT;
     Entity wall = world_CreateEntity(&world);
         world.transforms[wall] = (transform_Component) {
             .position = {500.0f, 200.0f},
             .size = {40.0f, 40.0f},
             .rotation = 0.0f
         };
+        world.colliders[wall] = (collider_Component) {
+            .collisionBox = (Rectangle){
+                    world.transforms[wall].position.x,
+                    world.transforms[wall].position.y,
+                    world.transforms[wall].size.x,
+                    world.transforms[wall].size.y,
+                },
+            .isImmovable = true,
+            .isTrigger = false,
+            };
         world.renders[wall] = (render_Component) {
             .color = RED,
             .isVisible = true,
@@ -43,7 +63,7 @@ int main(void){
             .zIndex = 0,
             };
         world.masks[wall] = 
-            COMP_TRANSFORM | COMP_RENDER;
+            COMP_TRANSFORM | COMP_COLLIDER | COMP_RENDER;
             
     while (!WindowShouldClose()){
 
@@ -51,6 +71,8 @@ int main(void){
 
         inputSystem_Update(&world);
         movementSystem_Update(&world, deltaTime);
+        collisionSystem_Update(&world);
+        resolveSystem_Update(&world);
 
         BeginDrawing();
             ClearBackground(BEIGE);

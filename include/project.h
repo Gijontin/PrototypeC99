@@ -18,6 +18,8 @@
 // Modules (kom ihåg att ha dem i rätt ordning av dependancies)
 #include "input_System.h"
 #include "movement_System.h"
+#include "collision_System.h"
+#include "resolve_System.h"
 #include "render_System.h"
 #include "dialogues.h"
 #include "world.h"
