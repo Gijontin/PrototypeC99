@@ -28,5 +28,6 @@
 // Generella macros eller något
 
 #define PROJECT_VERSION "0.0.1"
+#define TILE64 64
 
 #endif

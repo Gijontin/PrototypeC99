@@ -54,6 +54,9 @@ void resolveSystem_Update(World *world) {
             float overlapX = ((movableCollider->collisionBox.width * 0.5f) + (immovableCollider->collisionBox.width * 0.5f)) - fabsf(determineRelative_X);
             float overlapY = ((movableCollider->collisionBox.height * 0.5f) + (immovableCollider->collisionBox.height * 0.5f)) - fabsf(determineRelative_Y);
 
+        //Theoretically should fix colliding with two immovable objects roughly at the same time...
+            if (overlapX <= 0.0f || overlapY <= 0.0f) {continue;}
+
         //Determine direction to re-adjust transform.position (smallest overlap = gets pushed)
         if (overlapX < overlapY) { //HORIZONTAL PUSH
             if (determineRelative_X > 0) {
@@ -64,8 +67,11 @@ void resolveSystem_Update(World *world) {
         } else if (overlapY <= overlapX) { //VERTICAL PUSH
             if (determineRelative_Y > 0) {
                 world->transforms[movable].position.y += overlapY; //move down
+                world->movements[movable].velocity.y = 0.0f; //should stop accelarating through blocks if platformer mode
             } else {
                 world->transforms[movable].position.y -= overlapY; //move up
+                world->movements[movable].isGrounded = true;
+                world->movements[movable].velocity.y = 0.0f; //should stop accelerating through blocks if platformer mode
             }
         }
 

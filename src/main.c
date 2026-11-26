@@ -12,13 +12,18 @@ int main(void){
     Entity player = world_CreateEntity(&world); //sets player (ID) to 0 and bump up the world.entityCount to 1 (which will assign ID '1' to next Entity)
         world.transforms[player] = (transform_Component) {
             .position = {SCREENWIDTH * 0.5, SCREENHEIGHT * 0.5},
-            .size = {40, 40},
+            .size = {TILE64, TILE64},
             .rotation = 0.0f,
             };
         world.movements[player] = (movement_Component) {
             .speed = 4.0f,
             .speedMultiplier = 1.5f,
             .canMove = true,
+
+            .gravity = 0.60f,
+            .jumpForce = 15.0f,
+            .maxFallSpeed = 20.0f, //keep it below half of a tilesize...
+            .isGrounded = false,
             };
         world.colliders[player] = (collider_Component) {
             .collisionBox = (Rectangle){
@@ -42,7 +47,7 @@ int main(void){
     Entity wall = world_CreateEntity(&world);
         world.transforms[wall] = (transform_Component) {
             .position = {500.0f, 200.0f},
-            .size = {40.0f, 40.0f},
+            .size = {TILE64, TILE64},
             .rotation = 0.0f
         };
         world.colliders[wall] = (collider_Component) {
@@ -64,7 +69,9 @@ int main(void){
             };
         world.masks[wall] = 
             COMP_TRANSFORM | COMP_COLLIDER | COMP_RENDER;
-            
+
+    world_CubeWallFloorSpawner(&world);
+
     while (!WindowShouldClose()){
 
         float deltaTime = GetFrameTime() * 60.0f; //normalize speed regardless of fps

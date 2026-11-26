@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <string.h>
+#include "config.h"
 #include "world.h"
+
+const int tile64 = 64;
 
 void world_Init(World *world) {
 
@@ -33,5 +36,42 @@ Entity world_CreateEntity(World *world) {
 void world_DestroyEntity(World *world, Entity id) {
     if (id < MAX_ENTITIES && world->masks[id] != COMP_NONE) {
         world->masks[id] = COMP_NONE;
+    }
+}
+
+void world_CubeWallFloorSpawner(World *world) {
+
+    int fillWidthWithCubes = SCREENWIDTH / tile64;
+
+    for (uint32_t i = 0; i < fillWidthWithCubes; i++) {
+
+        uint32_t entity = world_CreateEntity(world);
+
+        if (entity >= MAX_ENTITIES) {break;}
+
+        world->transforms[entity] = (transform_Component) {
+            .position = {0 + (i * tile64), SCREENHEIGHT},
+            .size = {tile64, tile64},
+            .rotation = 0.0f
+        };
+        world->colliders[entity] = (collider_Component) {
+            .collisionBox = (Rectangle){
+                    world->transforms[entity].position.x,
+                    world->transforms[entity].position.y,
+                    world->transforms[entity].size.x,
+                    world->transforms[entity].size.y,
+                },
+            .isImmovable = true,
+            .isTrigger = false,
+            };
+        world->renders[entity] = (render_Component) {
+            .color = RED,
+            .isVisible = true,
+            .type = RND_REC,
+            .texture = NULL,
+            .zIndex = 0,
+            };
+        world->masks[entity] = 
+            COMP_TRANSFORM | COMP_COLLIDER | COMP_RENDER;
     }
 }

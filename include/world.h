@@ -60,5 +60,6 @@ world.masks[3] = COMP_TRANSFORM | COMP_RENDER; //då har den bara transform för
 
 void world_Init(World *world);
 Entity world_CreateEntity(World *world);
+void world_CubeWallFloorSpawner(World *world);
 
 #endif

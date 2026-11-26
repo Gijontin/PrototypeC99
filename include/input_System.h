@@ -2,6 +2,7 @@
 #define INPUT_SYSTEM_H
 
 #include "raylib.h"
+#include "movement_Component.h"
 #include "world.h"
 
 Vector2 input_GetDirection();

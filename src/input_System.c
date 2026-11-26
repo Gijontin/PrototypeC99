@@ -35,6 +35,16 @@ bool isSprinting(){
     return IsKeyDown(KEY_LEFT_SHIFT);
 }
 
+void spacebarLogic(World *world, uint32_t id){
+    if (IsKeyPressed(KEY_SPACE)) {
+    //PLATFORMER MODE
+        if (world->movements[id].isGrounded && world->movements[id].gravity > 0.0f) {
+            world->movements[id].wantsToJump = true;
+        } 
+    //TOP-DOWN MODE
+        else {}
+    }
+}
 
 /*
 AI explaining how the binary bitshift-mask-shid comparison logic works with the if check and need for a variable like 'required':
@@ -47,14 +57,16 @@ AI explaining how the binary bitshift-mask-shid comparison logic works with the 
 */
 void inputSystem_Update(World *world) {
 
-    uint32_t required = COMP_MOVEMENT | COMP_PLAYER_INPUT;
+    uint32_t required = COMP_TRANSFORM | COMP_MOVEMENT | COMP_PLAYER_INPUT;
 
     for (uint32_t i = 0; i < world->entityCount; i++) {
     
         if ((world->masks[i] & required) != required) {continue;}
-        
+
         world->movements[i].direction = input_GetDirection();
         world->movements[i].speedMultiplier = isSprinting() ? 1.5f : 1.0f;
+
+        spacebarLogic(world, i);     
     }
 
 }
