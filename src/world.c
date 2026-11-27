@@ -42,9 +42,12 @@ Entity world_CreateEntity(World *world) {
     /* Look into generational 16bit x 16bit IDs to solve future "dangling IDs" problems */
 }
 
-void world_DestroyEntity(World *world, Entity id) {
+bool world_DestroyEntity(World *world, Entity id) {
     if (id < MAX_ENTITIES && world->masks[id] != COMP_NONE) {
         world->masks[id] = COMP_NONE;
+        return true;
+    } else {
+        return false;
     }
 }
 

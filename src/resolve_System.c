@@ -13,6 +13,13 @@ void resolveSystem_Update(World *world) {
         //Hämta ID värdena från Entiteterna som ska 'behandlas'
         Entity RawA = world->collisionpairs[i].A;
         Entity RawB = world->collisionpairs[i].B;
+        
+        if (world->colliders[RawA].isTrigger || world->colliders[RawB].isTrigger) { //check for isTrigger first to skip a bunch of unecessary computations:
+            bool hasTrigger = world->colliders[RawA].isTrigger; 
+            Entity isTrigger = hasTrigger ? RawA : RawB;
+            world_DestroyEntity(world, isTrigger);
+            continue;
+        }
 
         //if both are | immovable OR movable | we don't need to do any calculations...
         if (world->colliders[RawA].isImmovable == world->colliders[RawB].isImmovable) {continue;}

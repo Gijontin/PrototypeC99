@@ -16,32 +16,6 @@ int main(void){
     world_Init(&world);
     player_Init(&world, &player, world_TileInputToPosition(MAX_COLS * 0.5, MAX_ROWS * 0.5));
 
-/*     Entity wall = world_CreateEntity(&world);
-        world.transforms[wall] = (transform_Component) {
-            .position = {500.0f, 200.0f},
-            .size = {TILE64, TILE64},
-            .rotation = 0.0f
-        };
-        world.colliders[wall] = (collider_Component) {
-            .collisionBox = (Rectangle){
-                    world.transforms[wall].position.x,
-                    world.transforms[wall].position.y,
-                    world.transforms[wall].size.x,
-                    world.transforms[wall].size.y,
-                },
-            .isImmovable = true,
-            .isTrigger = false,
-            };
-        world.renders[wall] = (render_Component) {
-            .color = RED,
-            .isVisible = true,
-            .type = RND_REC,
-            .texture = NULL,
-            .zIndex = 0,
-            };
-        world.masks[wall] = 
-            COMP_TRANSFORM | COMP_COLLIDER | COMP_RENDER; */
-
     world_CubeWallFloorSpawner(&world);
 
     while (!WindowShouldClose()){
@@ -54,6 +28,10 @@ int main(void){
     
     //Updaters
         cursor_Update(&cursorPosition);
+
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            entity_createBIGCHEESE(&world, world_SnapPosToTile(cursorPosition));
+        }
 
         inputSystem_Update(&world);
         movementSystem_Update(&world, deltaTime);
