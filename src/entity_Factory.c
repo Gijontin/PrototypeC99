@@ -1,5 +1,8 @@
 #include "entity_Factory.h"
 
+void entity_createUndefined(World *world, Vector2 position) {
+    
+}
 void entity_createWall(World *world, Vector2 position) {
     Entity wall = world_CreateEntity(world);
         world->transforms[wall] = (transform_Component) {
