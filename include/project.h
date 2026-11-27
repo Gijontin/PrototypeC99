@@ -9,6 +9,7 @@
 
 // My own core headers (utility, configs, globals etc...)
 #include "config.h"
+#include "cursor.h"
 
 // ECS Components
 #include "transform_Component.h"

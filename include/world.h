@@ -2,6 +2,7 @@
 #define WORLD_H
 
 #include <stdint.h>
+#include "config.h"
 #include "transform_Component.h"
 #include "collider_Component.h"
 #include "movement_Component.h"
@@ -38,6 +39,7 @@ typedef struct {
 } collisionPair;
 
 typedef struct {
+    Vector2 worldGrid[MAX_COLS * MAX_ROWS];
     transform_Component transforms[MAX_ENTITIES];
     collider_Component colliders[MAX_ENTITIES];
     movement_Component movements[MAX_ENTITIES];
@@ -61,5 +63,6 @@ world.masks[3] = COMP_TRANSFORM | COMP_RENDER; //då har den bara transform för
 void world_Init(World *world);
 Entity world_CreateEntity(World *world);
 void world_CubeWallFloorSpawner(World *world);
+void world_Debug(const World *world, bool beEfficient);
 
 #endif

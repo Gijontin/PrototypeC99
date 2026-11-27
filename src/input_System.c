@@ -63,6 +63,7 @@ void inputSystem_Update(World *world) {
     
         if ((world->masks[i] & required) != required) {continue;}
 
+    //WASD-movement + Shift(sprint)
         world->movements[i].direction = input_GetDirection();
         world->movements[i].speedMultiplier = isSprinting() ? 1.5f : 1.0f;
 

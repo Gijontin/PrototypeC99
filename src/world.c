@@ -3,12 +3,21 @@
 #include "config.h"
 #include "world.h"
 
-const int tile64 = 64;
+const int tile64 = 40;
 
 void world_Init(World *world) {
 
     //fresh start (complete wipe, hopefully)
     memset(world, 0, sizeof(*world));
+
+    //outer loop rows, inner loop columns results in all elements filled, remember the loop does y-axis first and then the inner loop does the x-axis (for assigning Vector2 values...)
+    uint32_t k = 0;
+    for (uint32_t row = 0; row < MAX_ROWS; row++){
+        for (uint32_t col = 0; col < MAX_COLS; col++){
+            if (k >= (MAX_ROWS * MAX_COLS)) {printf("world->worldGrid buffer overflow, y u dumb?"); break;}
+            world->worldGrid[k++] =  (Vector2){col, row};
+        }
+    }
 }
 
 Entity world_CreateEntity(World *world) {
@@ -73,5 +82,48 @@ void world_CubeWallFloorSpawner(World *world) {
             };
         world->masks[entity] = 
             COMP_TRANSFORM | COMP_COLLIDER | COMP_RENDER;
+    }
+
+}
+
+void world_Debug(const World *world, bool beEfficient) {
+
+    switch (beEfficient) {
+        case true: {
+        //TWO SEPARATE LOOPS (PROBABLY ABOUT AS EFFICIENT IT GETS BRUV)
+            for (int row = 0; row < MAX_ROWS; row++) {
+                DrawLine(0, (row + 1) * TILESIZE, SCREENWIDTH, (row + 1) * TILESIZE, BLACK);
+            }
+            for (int col = 0; col < MAX_COLS; col++) {
+                DrawLine(col * TILESIZE, 0, col * TILESIZE, SCREENHEIGHT, BLACK);
+            }
+        }
+        break;
+        case false: {
+        //NESTED FOR CUBES (INEFFICIENT AF BRUV)
+            for (int row = 0; row < MAX_ROWS; row++) {
+                for (int col = 0; col < MAX_COLS; col++) {
+                    DrawRectangleLines(col * TILESIZE, (row + 1) * TILESIZE, TILESIZE, -TILESIZE, BLACK);
+                }
+            }
+        }
+        break;
+
+        default: 
+            break;
+    }
+
+    //World usage lögic
+    int maxWorldLoop = (sizeof(world->worldGrid) /  sizeof(world->worldGrid[0]));
+    int textSize = 10;
+    for (int i = 0; i < maxWorldLoop; i++) {
+        Vector2 cell = world->worldGrid[i];
+
+        const char *text = TextFormat("(%0.f, %0.f)", cell.x, cell.y);
+        
+        DrawText(text,cell.x * TILESIZE, ((cell.y + 1) * TILESIZE) - textSize, textSize, RED);
+
+        //test, it works
+        //DrawRectangleLines(cell.x * TILESIZE, ((cell.y + 1) * TILESIZE) - TILESIZE, TILESIZE, TILESIZE, BLACK);
     }
 }

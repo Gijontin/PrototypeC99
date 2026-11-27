@@ -3,7 +3,7 @@
 int main(void){
 
     //1280x720, kinda baseline 720p resolution, but can easily scale to 1080, 1440, and 4K by multiplying with 1.5x, 2x, or 3x (respectively)
-    InitWindow(SCREENWIDTH, SCREENHEIGHT, "Första Försöket");
+    InitWindow(SCREENWIDTH, SCREENHEIGHT, "PrototypeC99");
     SetTargetFPS(60);
 
     World world = {0};
@@ -76,6 +76,8 @@ int main(void){
 
         float deltaTime = GetFrameTime() * 60.0f; //normalize speed regardless of fps
 
+        cursor_Update(&cursorPosition);
+
         inputSystem_Update(&world);
         movementSystem_Update(&world, deltaTime);
         collisionSystem_Update(&world);
@@ -84,7 +86,10 @@ int main(void){
         BeginDrawing();
             ClearBackground(BEIGE);
             DrawText(PROJECT_VERSION, 320, 180, 20, BLACK);
+            DrawText(PROJECT_VERSION, 320, 180, 20, BLACK);
+            cursor_Debug();
             renderSystem_Draw(&world);
+            world_Debug(&world, true);
         EndDrawing();
     }
     
