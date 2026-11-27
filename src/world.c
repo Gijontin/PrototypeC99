@@ -86,44 +86,47 @@ void world_CubeWallFloorSpawner(World *world) {
 
 }
 
-void world_Debug(const World *world, bool beEfficient) {
+void world_Debug(const World *world, bool beEfficient, bool show) {
 
-    switch (beEfficient) {
-        case true: {
-        //TWO SEPARATE LOOPS (PROBABLY ABOUT AS EFFICIENT IT GETS BRUV)
-            for (int row = 0; row < MAX_ROWS; row++) {
-                DrawLine(0, (row + 1) * TILESIZE, SCREENWIDTH, (row + 1) * TILESIZE, BLACK);
-            }
-            for (int col = 0; col < MAX_COLS; col++) {
-                DrawLine(col * TILESIZE, 0, col * TILESIZE, SCREENHEIGHT, BLACK);
-            }
-        }
-        break;
-        case false: {
-        //NESTED FOR CUBES (INEFFICIENT AF BRUV)
-            for (int row = 0; row < MAX_ROWS; row++) {
+    if (show){
+        switch (beEfficient) {
+            case true: {
+            //TWO SEPARATE LOOPS (PROBABLY ABOUT AS EFFICIENT IT GETS BRUV)
+                for (int row = 0; row < MAX_ROWS; row++) {
+                    DrawLine(0, (row + 1) * TILESIZE, SCREENWIDTH, (row + 1) * TILESIZE, BLACK);
+                }
                 for (int col = 0; col < MAX_COLS; col++) {
-                    DrawRectangleLines(col * TILESIZE, (row + 1) * TILESIZE, TILESIZE, -TILESIZE, BLACK);
+                    DrawLine(col * TILESIZE, 0, col * TILESIZE, SCREENHEIGHT, BLACK);
                 }
             }
-        }
-        break;
-
-        default: 
             break;
+            case false: {
+            //NESTED FOR CUBES (INEFFICIENT AF BRUV)
+                for (int row = 0; row < MAX_ROWS; row++) {
+                    for (int col = 0; col < MAX_COLS; col++) {
+                        DrawRectangleLines(col * TILESIZE, (row + 1) * TILESIZE, TILESIZE, -TILESIZE, BLACK);
+                    }
+                }
+            }
+            break;
+
+            default: 
+                break;
+        }
+
+        //World usage lögic
+        int maxWorldLoop = (sizeof(world->worldGrid) /  sizeof(world->worldGrid[0]));
+        int textSize = 10;
+        for (int i = 0; i < maxWorldLoop; i++) {
+            Vector2 cell = world->worldGrid[i];
+
+            const char *text = TextFormat("(%0.f, %0.f)", cell.x, cell.y);
+            
+            DrawText(text, cell.x * TILESIZE, ((cell.y + 1) * TILESIZE) - textSize, textSize, RED);
+
+            //test, it works
+            //DrawRectangleLines(cell.x * TILESIZE, ((cell.y + 1) * TILESIZE) - TILESIZE, TILESIZE, TILESIZE, BLACK);
+        }
     }
 
-    //World usage lögic
-    int maxWorldLoop = (sizeof(world->worldGrid) /  sizeof(world->worldGrid[0]));
-    int textSize = 10;
-    for (int i = 0; i < maxWorldLoop; i++) {
-        Vector2 cell = world->worldGrid[i];
-
-        const char *text = TextFormat("(%0.f, %0.f)", cell.x, cell.y);
-        
-        DrawText(text,cell.x * TILESIZE, ((cell.y + 1) * TILESIZE) - textSize, textSize, RED);
-
-        //test, it works
-        //DrawRectangleLines(cell.x * TILESIZE, ((cell.y + 1) * TILESIZE) - TILESIZE, TILESIZE, TILESIZE, BLACK);
-    }
 }

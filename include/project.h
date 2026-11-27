@@ -1,6 +1,12 @@
 #ifndef PROJECT_H
 #define PROJECT_H
 
+/*
+
+    MAIN INTENT TO JUST BE FOR main.c TO BE ABLE TO RECOGNISE EVERYTHING IT'S FED
+
+*/
+
 // Standard Lib. headers
 #include <stdio.h>
 
@@ -12,11 +18,15 @@
 #include "cursor.h"
 
 // ECS Components
+#include "player.h"
 #include "transform_Component.h"
 #include "movement_Component.h"
 #include "render_Component.h"
 
-// Modules (kom ihåg att ha dem i rätt ordning av dependancies)
+//Factories
+#include "entity_Factory.h"
+
+// System/Modules (kom ihåg att ha dem i rätt ordning av dependancies)
 #include "input_System.h"
 #include "movement_System.h"
 #include "collision_System.h"

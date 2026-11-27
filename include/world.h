@@ -63,6 +63,15 @@ world.masks[3] = COMP_TRANSFORM | COMP_RENDER; //då har den bara transform för
 void world_Init(World *world);
 Entity world_CreateEntity(World *world);
 void world_CubeWallFloorSpawner(World *world);
-void world_Debug(const World *world, bool beEfficient);
+void world_Debug(const World *world, bool beEfficient, bool show);
+
+//static skapar en tillgänglig kopia för alla som använder headern och inline gör nått skit så att matten används och körs direkt ifrån headern eller nått
+//ska vara effektivare när det är små kalkulationer som görs...
+static inline Vector2 world_TileInputToPosition(uint32_t col, uint32_t row) {
+    
+    if (col >= MAX_COLS || row >= MAX_ROWS) {return (Vector2){0, 0};}
+
+    return (Vector2){col * TILESIZE, (row + 1) * TILESIZE};
+}
 
 #endif
