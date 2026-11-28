@@ -4,7 +4,7 @@ int main(void){
     //debug prototype-calls
     void debug_displayFPS();
     void debug_displayPlayerPosition(const World *world, Entity player, Vector2 position, int fontsize);
-    void debug_displayActiveEntities(const World *world, Vector2 position, int fontsize);
+    void debug_displayHighestEntityID(const World *world, Vector2 position, int fontsize);
 
     //1280x720, kinda baseline 720p resolution, but can easily scale to 1080, 1440, and 4K by multiplying with 1.5x, 2x, or 3x (respectively)
     InitWindow(SCREENWIDTH, SCREENHEIGHT, "PrototypeC99");
@@ -46,7 +46,7 @@ int main(void){
             world_Debug(&world, true, debugIsOn);
             debug_displayFPS();
             debug_displayPlayerPosition(&world, player, (Vector2){5.0f, 20.0f * 2}, 20);
-            debug_displayActiveEntities(&world, (Vector2){5.0f, 20.0f * 3}, 20);
+            debug_displayHighestEntityID(&world, (Vector2){5.0f, 20.0f * 3}, 20);
 
         EndDrawing();
     }
@@ -70,8 +70,8 @@ void debug_displayPlayerPosition(const World *world, Entity player, Vector2 posi
     
     DrawText(text, position.x, position.y, fontsize, BLACK);
 }
-void debug_displayActiveEntities(const World *world, Vector2 position, int fontsize) {
-    const char *text = TextFormat("Active entities: %d", world->entityCount);
+void debug_displayHighestEntityID(const World *world, Vector2 position, int fontsize) {
+    const char *text = TextFormat("Highest Entity ID: %d", world->entityCount);
     int textWidth = MeasureText(text, fontsize);
 
     DrawText(text, position.x, position.y, fontsize, BLACK);

@@ -1,27 +1,31 @@
 #include <math.h>
+#include <assert.h>
 #include "resolve_System.h"
 
 void resolveSystem_Update(World *world) {
 
+    // Guard
     if (world->collisionPairBuffer < 1) {return;}
     
     for (uint32_t i = 0; i < world->collisionPairBuffer; i++) {
-    //skipping mask check here because colliderSystem technically already filtered that out from the collisionPair's list
+    // Skipping guard check for mask here, should be done in collision_System already...
 
-    //Readability fix (compilern optimerar säkert bort denna skiten ändå, så enjoy 4 meine human eyes n brain...)
+    //--- Readability fix (compilern optimerar säkert bort denna skiten ändå, så enjoy 4 meine human eyes n brain...) ---
         
         //Hämta ID värdena från Entiteterna som ska 'behandlas'
         Entity RawA = world->collisionpairs[i].A;
         Entity RawB = world->collisionpairs[i].B;
         
-        if (world->colliders[RawA].isTrigger || world->colliders[RawB].isTrigger) { //check for isTrigger first to skip a bunch of unecessary computations:
+        //isTrigger-check, done first to (SKIP) a bunch of unecessary computations:
+        if (world->colliders[RawA].isTrigger || world->colliders[RawB].isTrigger) {
+        assert((world->colliders[RawA].isTrigger != world->colliders[RawB].isTrigger));
             bool hasTrigger = world->colliders[RawA].isTrigger; 
             Entity isTrigger = hasTrigger ? RawA : RawB;
             world_DestroyEntity(world, isTrigger);
-            continue;
+            continue; //<-- ! (Note: here's the skippy_boi hidin')
         }
 
-        //if both are | immovable OR movable | we don't need to do any calculations...
+        // (SKIP) if both are | immovable OR movable | we don't need to do any calculations...
         if (world->colliders[RawA].isImmovable == world->colliders[RawB].isImmovable) {continue;}
 
         bool CannotBeMoved = world->colliders[RawA].isImmovable;
@@ -33,54 +37,65 @@ void resolveSystem_Update(World *world) {
         collider_Component *movableCollider = &world->colliders[movable];
         collider_Component *immovableCollider = &world->colliders[immovable];
 
-    //-----------------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------------------------
 
-    //RESOLVE MATH
-        //do math on each index-pair of A & B entities and resolve the transform.position AND ALSO assign that transform.position to their collisionBox.x -.y positions
+    //RESOLVE MATH (Kids, don't do math, not even once)
+/*     
+        ASSUME BOTTOM LEFT IS THE ANCHOR POINT, (y - height) = DRAWING UPWARDS (raylib logic).
         
-        //ASSUME BOTTOM LEFT IS THE ANCHOR POINT, (y - height) = DRAWING UPWARDS (raylib logic)
-
-            // - how deep is the .x and .y overlap
-            // - which axis has the smallest overlap value
-            // - does + OR - push the movable entity away from the immovable entity
-
+        Do math on each index-pair of A & B entities and resolve the transform.position AND ALSO assign that transform.position to their collisionBox.x -.y positions
+            - how deep is the .x and .y overlap
+            - which axis has the smallest overlap value
+            - does + OR - push the movable entity away from the immovable entity
+*/
         //Math to determine the center of each entity's collisionbox (half their width and height, based on position as well, should determine where the middle is):
-            float centerA_X = movableCollider->collisionBox.x + (movableCollider->collisionBox.width * 0.5f);
-            float centerB_X = immovableCollider->collisionBox.x + (immovableCollider->collisionBox.width * 0.5f);
-        
-        //Note: we use MINUS here to draw UPWARDS (thanks to Raylib logic)
-            float centerA_Y = movableCollider->collisionBox.y - (movableCollider->collisionBox.height * 0.5f);
-            float centerB_Y = immovableCollider->collisionBox.y - (immovableCollider->collisionBox.height * 0.5f);
+            //Note: we use MINUS on the Y-axis, to adjust for the draw-UPWARDS logic (this is what I have to do to counter Raylib's baseline render logic)
+            
+            //STATIC and NOT the same as the dynamic center_ Vectors
+            Vector2 halfSize_movableCollider   = {movableCollider->collisionBox.width * 0.5f, movableCollider->collisionBox.height * 0.5f};
+            Vector2 halfSize_immovableCollider = {immovableCollider->collisionBox.width * 0.5f, immovableCollider->collisionBox.height * 0.5f};
+            
+            Vector2 center_movableCollider = {
+                (movableCollider->collisionBox.x + halfSize_movableCollider.x), 
+                (movableCollider->collisionBox.y - halfSize_movableCollider.y)
+            };
+            Vector2 center_immovableCollider = {
+                (immovableCollider->collisionBox.x + halfSize_immovableCollider.x), 
+                (immovableCollider->collisionBox.y - halfSize_immovableCollider.y)
+            };
 
-        //negative result = A is positioned LEFT of B | positive result = A is positioned RIGHT of B
-            float determineRelative_X = centerA_X - centerB_X;
-        //negative result = A is positioned ABOVE B   | positive result = A is positioned BELOW B
-            float determineRelative_Y = centerA_Y - centerB_Y;
+        //Logic/Purpose explained (movableCollider = A && immovableCollider = B):
+            //negative result = A.x is positioned LEFT of B.x | positive result = A.x is positioned RIGHT of B.x
+            //negative result = A.y is positioned ABOVE B.y   | positive result = A.y is positioned BELOW B.y
+            Vector2 determineRelative = {(center_movableCollider.x - center_immovableCollider.x), (center_movableCollider.y - center_immovableCollider.y)};
 
-        //Calculate overlap to determine how much transform.position needs to be re-adjusted for
-            float overlapX = ((movableCollider->collisionBox.width * 0.5f) + (immovableCollider->collisionBox.width * 0.5f)) - fabsf(determineRelative_X);
-            float overlapY = ((movableCollider->collisionBox.height * 0.5f) + (immovableCollider->collisionBox.height * 0.5f)) - fabsf(determineRelative_Y);
+        //Calculate overlap to determine how much transform.position needs to be re-adjusted to not (get stuck within)/(visually, render-overlap with) an immovable object
+            Vector2 overlap = { //(minimum safe distance) - (Actual distance between centers) | typ: (static-värde safe limit) - (dynamic-värde current distance)
+                (halfSize_movableCollider.x + halfSize_immovableCollider.x) - fabsf(determineRelative.x),
+                (halfSize_movableCollider.y + halfSize_immovableCollider.y) - fabsf(determineRelative.y)
+            };
 
-        //Theoretically should fix colliding with two immovable objects roughly at the same time...
-            if (overlapX <= 0.0f || overlapY <= 0.0f) {continue;}
+        //Theoretically, should fix (a scenario of) colliding with two immovable objects roughly at the same time (by not getting stuck due to 'simultaneous' calculations)...
+            if (overlap.x <= 0.0f || overlap.y <= 0.0f) {continue;}
 
-        //Determine direction to re-adjust transform.position (smallest overlap = gets pushed)
-        if (overlapX < overlapY) { //HORIZONTAL PUSH
-            if (determineRelative_X > 0) {
-                world->transforms[movable].position.x += overlapX; //move right
-            } else {
-                world->transforms[movable].position.x -= overlapX; //move left
+        //HORIZONTAL PUSH //om jag stöter på future "snagging" mellan två immovable tiles kanske det kan lösas med att ändra till if (overlap.x + 0.01f < overlap.y) för att ge det en liten bias åt ena immovable entiteten
+            if (overlap.x < overlap.y) { 
+                if (determineRelative.x > 0) {
+                    world->transforms[movable].position.x += overlap.x; //move right
+                } else {
+                    world->transforms[movable].position.x -= overlap.x; //move left
+                }
+        //VERTICAL PUSH
+            } else if (overlap.y <= overlap.x) { 
+                if (determineRelative.y > 0) {
+                    world->transforms[movable].position.y += overlap.y; //move down
+                    world->movements[movable].velocity.y = 0.0f;       //(PLATFORMER MODE)should stop accelarating through blocks
+                } else {
+                    world->transforms[movable].position.y -= overlap.y; //move up
+                    world->movements[movable].isGrounded = true;       //(PLATFORMER MODE)
+                    world->movements[movable].velocity.y = 0.0f;       //(PLATFORMER MODE)should stop accelarating through blocks
+                }
             }
-        } else if (overlapY <= overlapX) { //VERTICAL PUSH
-            if (determineRelative_Y > 0) {
-                world->transforms[movable].position.y += overlapY; //move down
-                world->movements[movable].velocity.y = 0.0f; //should stop accelarating through blocks if platformer mode
-            } else {
-                world->transforms[movable].position.y -= overlapY; //move up
-                world->movements[movable].isGrounded = true;
-                world->movements[movable].velocity.y = 0.0f; //should stop accelerating through blocks if platformer mode
-            }
-        }
 
         movableCollider->collisionBox.x = world->transforms[movable].position.x;
         movableCollider->collisionBox.y = world->transforms[movable].position.y;
