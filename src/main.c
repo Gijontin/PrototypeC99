@@ -10,6 +10,8 @@ int main(void){
     InitWindow(SCREENWIDTH, SCREENHEIGHT, "PrototypeC99");
     SetTargetFPS(60);
 
+    audio_Init();
+
     bool debugIsOn = false;
 
     World world = {0};
@@ -32,6 +34,9 @@ int main(void){
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             entity_createBIGCHEESE(&world, world_SnapPosToTile(cursorPosition));
         }
+        if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+            entity_createWall(&world, world_SnapPosToTile(cursorPosition));
+        }
 
         inputSystem_Update(&world);
         movementSystem_Update(&world, deltaTime);
@@ -41,8 +46,11 @@ int main(void){
         BeginDrawing();
 
             ClearBackground(BEIGE);
-            cursor_Debug();
+        //Main Renderer
             renderSystem_Draw(&world);
+
+        //Debug or Dev tooling rendering (keep after Main Renderer to act as overlay)
+            cursor_Debug();
             world_Debug(&world, true, debugIsOn);
             debug_displayFPS();
             debug_displayPlayerPosition(&world, player, (Vector2){5.0f, 20.0f * 2}, 20);
@@ -51,6 +59,7 @@ int main(void){
         EndDrawing();
     }
     
+    audio_DeInit();
     CloseWindow();
 
     return 0;

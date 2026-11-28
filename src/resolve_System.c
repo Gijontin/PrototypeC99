@@ -1,6 +1,7 @@
 #include <math.h>
 #include <assert.h>
 #include "resolve_System.h"
+#include "audio.h"
 
 void resolveSystem_Update(World *world) {
 
@@ -21,7 +22,9 @@ void resolveSystem_Update(World *world) {
         assert((world->colliders[RawA].isTrigger != world->colliders[RawB].isTrigger));
             bool hasTrigger = world->colliders[RawA].isTrigger; 
             Entity isTrigger = hasTrigger ? RawA : RawB;
-            world_DestroyEntity(world, isTrigger);
+            if (world_DestroyEntity(world, isTrigger)) {
+                audio_playSoundPitchVariation(monch);
+            }
             continue; //<-- ! (Note: here's the skippy_boi hidin')
         }
 
@@ -100,4 +103,7 @@ void resolveSystem_Update(World *world) {
         movableCollider->collisionBox.x = world->transforms[movable].position.x;
         movableCollider->collisionBox.y = world->transforms[movable].position.y;
     }
+}
+
+void triggerMonchSound(){
 }

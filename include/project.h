@@ -16,6 +16,8 @@
 // My own core headers (utility, configs, globals etc...)
 #include "config.h"
 #include "cursor.h"
+#include "audio.h"
+
 
 // ECS Components
 #include "player.h"
